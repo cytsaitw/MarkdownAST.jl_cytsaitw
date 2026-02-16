@@ -97,23 +97,24 @@ function analyze_tabs(node::Node, depth=0)
         html = node.element.html
         
         # Check for different components of tab structure
-        if contains(html, "doc-tabs\"")
-            println("\n$(indent)✓ Found tab container div")
-        elseif contains(html, "doc-tabs__labels")
-            println("$(indent)✓ Found labels container")
-        elseif contains(html, "doc-tabs__label")
+        if occursin("doc-tabs\"", html)
+            println("- Found tab container")
+        elseif occursin("doc-tabs__labels", html)
+            println("  - Found labels container")
+        elseif occursin("doc-tabs__label", html)
             # Extract the label text from the button
             label_match = match(r">([^<]+)</button>", html)
-            if !isnothing(label_match)
+            if label_match !== nothing
                 println("$(indent)✓ Tab label: \"$(label_match[1])\"")
             end
-        elseif contains(html, "doc-tabs__panel")
-            # Extract the panel info
+        elseif occursin("doc-tabs__panel", html)
+            # Extract panel ID
             panel_match = match(r"data-tab=\"(\d+)\"", html)
-            if !isnothing(panel_match)
+            if panel_match !== nothing
                 println("$(indent)✓ Panel (tab #$(panel_match[1]))")
             end
-        elseif contains(html, "</div>")
+        elseif occursin("</div>", html)
+            # Closing div
             println("$(indent)✓ Closing div tag")
         end
     end

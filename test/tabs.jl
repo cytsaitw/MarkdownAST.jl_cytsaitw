@@ -36,13 +36,13 @@ using Markdown: @md_str
         for child in ast.children
             if child.element isa HTMLBlock
                 html = child.element.html
-                if contains(html, "doc-tabs\"")
+                if occursin("doc-tabs\"", html)
                     found_div_open = true
                 end
-                if contains(html, "doc-tabs__labels")
+                if occursin("doc-tabs__labels", html)
                     found_labels = true
                 end
-                if contains(html, "doc-tabs__panel")
+                if occursin("doc-tabs__panel", html)
                     found_panels = true
                 end
             end
@@ -74,10 +74,10 @@ using Markdown: @md_str
         for child in ast.children
             if child.element isa HTMLBlock
                 html = child.element.html
-                if contains(html, "Label One")
+                if occursin("Label One", html)
                     found_label_one = true
                 end
-                if contains(html, "Label Two")
+                if occursin("Label Two", html)
                     found_label_two = true
                 end
             end
@@ -132,11 +132,11 @@ using Markdown: @md_str
         for child in ast.children
             if child.element isa HTMLBlock
                 html = child.element.html
-                if contains(html, "&lt;dangerous&gt;")
+                if occursin("&lt;dangerous&gt;", html)
                     found_escaped = true
                 end
                 # Should NOT contain unescaped version
-                @test !contains(html, "<dangerous>") || !contains(html, "C++ <dangerous>")
+                @test !occursin("<dangerous>", html) || !occursin("C++ <dangerous>", html)
             end
         end
         
@@ -210,7 +210,7 @@ using Markdown: @md_str
         for child in ast.children
             if child.element isa HTMLBlock
                 html = child.element.html
-                if contains(html, "doc-tabs__panel")
+                if occursin("doc-tabs__panel", html)
                     panel_count += 1
                 end
             end
@@ -240,10 +240,10 @@ using Markdown: @md_str
         for child in ast.children
             if child.element isa HTMLBlock
                 html = child.element.html
-                if contains(html, "data-tab=")
-                    if contains(html, "doc-tabs__label")
+                if occursin("data-tab=", html)
+                    if occursin("doc-tabs__label", html)
                         button_tabs += 1
-                    elseif contains(html, "doc-tabs__panel")
+                    elseif occursin("doc-tabs__panel", html)
                         panel_tabs += 1
                     end
                 end

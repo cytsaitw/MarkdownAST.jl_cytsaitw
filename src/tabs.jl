@@ -294,13 +294,12 @@ This function retrieves and reconstructs the original content for processing.
 # Example
 ```julia
 content_node = preserve_tab_content(html_block_node)
-if !isnothing(content_node)
+if content_node !== nothing
     # Process the contained content
     render_node(content_node)
 end
 ```
 """
-function preserve_tab_content(node::Node)
     if node.element isa HTMLBlock && node.meta isa Dict && haskey(node.meta, "content")
         return node.meta["content"]
     end
