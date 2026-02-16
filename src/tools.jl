@@ -90,3 +90,102 @@ function _tablesize(node::Node, countcols::Bool)
     end
     return nrows, ncols
 end
+
+# --- Tabs Admonition transformer -------------------------------------------------
+"""
+    transform_tabs_admonitions(root::Node)
+
+Transforms `Admonition` nodes with `category == "tabs"` into a sequence of
+`HTMLBlock` and original Markdown nodes so that the tab labels are emitted as
+raw HTML while the tab panel contents remain as Markdown AST nodes. Keeping the
+panel contents as Markdown nodes preserves code blocks and other elements for
+Documenter syntax highlighting.
+"""
+function transform_tabs_admonitions(root::Node)
+    escape_html(s::String) = replace(replace(replace(replace(s, "&" => "&amp;"), "<" => "&lt;"), ">" => "&gt;"), '"' => "&quot;")
+
+    function collect_plain_text(n::Node)
+        txt = ""
+        # If the node itself is a leaf inline with textual content, include it
+        el = n.element
+        if el isa Text
+            return el.text
+        elseif el isa Code
+            return el.code
+        end
+        for c in n.children
+            txt *= collect_plain_text(c)
+        end
+        return txt
+    end
+
+    f = function(node::Node)
+        el = node.element
+        if el isa Admonition && el.category == "tabs"
+            children = collect(node.children)
+
+            # First pass: find headings (tab labels) and split panels
+            labels = String[]
+            panels = Vector{Vector{Node}}()
+            current_panel = Vector{Node}()
+            seen_heading = false
+
+            for child in children
+                if child.element isa Heading
+                    # start a new panel
+                    label = collect_plain_text(child)
+                    push!(labels, escape_html(label))
+                    if seen_heading
+                        push!(panels, current_panel)
+                        current_panel = Vector{Node}()
+                    else
+                        seen_heading = true
+                    end
+                else
+                    push!(current_panel, child)
+                end
+            end
+
+            if !seen_heading
+                # nothing to transform: return original node
+                return node
+            end
+
+            # push the final panel
+            push!(panels, current_panel)
+
+            result = Vector{Node}()
+
+            push!(result, Node(HTMLBlock("<div class=\"doc-tabs\">")))
+
+            # Labels container
+            push!(result, Node(HTMLBlock("<div class=\"doc-tabs__labels\">")))
+            for (i, label) in enumerate(labels)
+                btn = "<button class=\"doc-tabs__label\" data-tab=\"$(i)\">$(label)</button>"
+                push!(result, Node(HTMLBlock(btn)))
+            end
+            push!(result, Node(HTMLBlock("</div>")))
+
+            # Panels: keep original Markdown nodes inside
+            for (i, panel_nodes) in enumerate(panels)
+                push!(result, Node(HTMLBlock("<div class=\"doc-tabs__panel\" data-tab=\"$(i)\">")))
+                # append panel nodes (these are Node objects). They will be unlinked and
+                # re-inserted by the parent caller when constructing the new tree.
+                for pn in panel_nodes
+                    push!(result, pn)
+                end
+                push!(result, Node(HTMLBlock("</div>")))
+            end
+
+            push!(result, Node(HTMLBlock("</div>")))
+
+            return result
+        else
+            return node
+        end
+    end
+
+    replace!(f, root)
+    return root
+end
+

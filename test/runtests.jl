@@ -11,4 +11,5 @@ using Test
     include("fromstdlib.jl")
     include("tostdlib.jl")
     include("abstracttrees.jl")
+    include("tabs.jl")
 end

@@ -10,6 +10,7 @@ include("astmacro.jl")
 include("abstracttrees.jl")
 include("stdlib/fromstdlib.jl")
 include("stdlib/tostdlib.jl")
+include("tabs.jl")
 
 # Compat with older Julia versions
 #

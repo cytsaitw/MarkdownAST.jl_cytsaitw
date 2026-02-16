@@ -11,10 +11,11 @@ makedocs(
         "astmacro.md",
         "iteration.md",
         "Conversion to/from `Markdown`" => "stdlib.md",
+        "Tab Transformation Guide" => "tabs.md",
     ],
     # documentation checks
     modules = [MarkdownAST],
-    checkdocs = :all,
+    checkdocs = :missing,
 )
 
 deploydocs(

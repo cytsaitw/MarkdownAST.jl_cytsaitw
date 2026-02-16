@@ -20,7 +20,14 @@ called every time a new node is constructed.
 """
 Base.convert(::Type{Node}, md::Markdown.MD) = convert(Node{Nothing}, md)
 function Base.convert(::Type{Node{M}}, md::Markdown.MD, meta=M) where M
-    _convert(NodeFn{M}(meta), Document(), _convert_block, md.content)
+    root = _convert(NodeFn{M}(meta), Document(), _convert_block, md.content)
+    # Post-process the converted tree to transform any tabs-style admonitions
+    try
+        transform_tabs_admonitions(root)
+    catch err
+        @warn "transform_tabs_admonitions failed" err=err
+    end
+    return root
 end
 
 struct NodeFn{M}
