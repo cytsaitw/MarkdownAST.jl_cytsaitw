@@ -300,6 +300,7 @@ if content_node !== nothing
 end
 ```
 """
+function preserve_tab_content(node::Node)
     if node.element isa HTMLBlock && node.meta isa Dict && haskey(node.meta, "content")
         return node.meta["content"]
     end
