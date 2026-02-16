@@ -19,5 +19,5 @@ makedocs(
 )
 
 deploydocs(
-    repo = "github.com/JuliaDocs/MarkdownAST.jl.git",
+    repo = "github.com/cytsaitw/MarkdownAST.jl_cytsaitw.git",
 )
